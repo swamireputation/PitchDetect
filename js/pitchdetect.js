@@ -81,13 +81,13 @@ function gotStream(stream) {
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
     mediaStreamSource.connect( analyser );
-    updatePitch();
+    drawArt();
 }
 
-function updatePitch(time) {
+function drawArt(time) {
     var cycles = new Array();
     analyser.getFloatTimeDomainData(buf);
-    var pitch = autoCorrelate(buf, audioContext.sampleRate);
+    var pitch = getPitch(buf, audioContext.sampleRate);
 
     if (canvasElem) {
         // This draws the current waveform, useful for debugging
@@ -116,21 +116,21 @@ function updatePitch(time) {
 
     if (pitch != -1) {
         pitchElem.innerText = Math.round(pitch);
-        var note = noteFromPitch(pitch);
+        var note = getNoteFromPitch(pitch);
         noteElem.innerHTML = noteStrings[note % 12];
     }
 
     if (!window.requestAnimationFrame)
         window.requestAnimationFrame = window.webkitRequestAnimationFrame;
-    rafID = window.requestAnimationFrame(updatePitch);
+    rafID = window.requestAnimationFrame(drawArt);
 }
 
-function noteFromPitch(frequency) {
+function getNoteFromPitch(frequency) {
 	var noteNum = 12 * (Math.log( frequency / 440 )/Math.log(2) );
 	return Math.round( noteNum ) + 69;
 }
 
-function autoCorrelate( buf, sampleRate ) {
+function getPitch( buf, sampleRate ) {
 	// Implements the ACF2+ algorithm
 	var SIZE = buf.length;
 	var rms = 0;
