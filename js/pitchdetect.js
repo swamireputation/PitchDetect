@@ -33,8 +33,8 @@ var notes = [
 
 var canvasWidth = 800;
 var canvasHeight = 600;
-var xPoint = 0;
-var yPoint = canvasHeight;
+var xValue = 0;
+var yValue = canvasHeight;
 
 window.onload = function() {
 	audioContext = new AudioContext();
@@ -92,30 +92,33 @@ function gotStream(stream) {
 function drawArt(time) {
     analyser.getFloatTimeDomainData(buf);
     var pitch = getPitch(buf, audioContext.sampleRate);
-	var note = getNoteFromPitch(pitch);
-	yPoint = getYPointFromNote(note);
+    var noteValue = getNoteValueFromPitch(pitch);
 
-	if (xPoint === canvasWidth) {
-		xPoint = 0;
-	}
+    //increment the x value arbitrarily so we see marks across the x axis. Reset if we reach the end of the canvas.
+    xValue = xValue + 10;
+    if (xValue === canvasWidth) {
+        xValue = 0;
+    }
 
-	xPoint = xPoint + 10;
-	
-	console.log(xPoint + ", " + yPoint);
+    //get y value based on the note value.
+    yValue = getYValueFromNote(noteValue);
+
+    console.log(xValue + ", " + yValue);
 
     if (canvasElem) {
-		context.strokeStyle = "red";
+		//draw the first mark
+        context.strokeStyle = "red";
         context.beginPath();
-        context.moveTo(xPoint, yPoint);
-        context.lineTo(xPoint, yPoint - 2);
+        context.moveTo(xValue, yValue);
+        context.lineTo(xValue, yValue - 2);
         context.stroke();
 
-		var y2 = yPoint + 400;
-
-		context.strokeStyle = "green";
+		//draw a second one elsewhere in the y axis
+        var y2 = yValue + 400;
+        context.strokeStyle = "green";
         context.beginPath();
-        context.moveTo(xPoint, y2);
-        context.lineTo(xPoint, y2 - 2);
+        context.moveTo(xValue, y2);
+        context.lineTo(xValue, y2 - 2);
         context.stroke();
     }
 
@@ -124,7 +127,7 @@ function drawArt(time) {
     rafID = window.requestAnimationFrame(drawArt);
 }
 
-function getYPointFromNote(note) {
+function getYValueFromNote(note) {
 	return note % canvasHeight;
 	// if (note === "A") {
     //     return canvasHeight / 1;
@@ -153,11 +156,16 @@ function getYPointFromNote(note) {
     // }
 }
 
-function getNoteFromPitch(frequency) {
+function getNoteValueFromPitch(frequency) {
 	var noteNum = 12 * (Math.log( frequency / 440 )/Math.log(2) );
 	var noteValue =  Math.round( noteNum ) + 69;
 	return noteValue;
-	//return notes[noteValue % 12];
+}
+
+function getNoteStringFromPitch(frequency) {
+    var noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
+    var noteValue = Math.round(noteNum) + 69;
+    return notes[noteValue % 12];
 }
 
 function getPitch( buf, sampleRate ) {
