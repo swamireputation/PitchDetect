@@ -3,42 +3,20 @@
 	<head>
 		<title>Pitch Detector</title>
 		<link href='http://fonts.googleapis.com/css?family=Alike' rel='stylesheet' type='text/css'>
-		<style>
-			body { font: 14pt 'Alike', sans-serif;}
-			#note { font-size: 164px; }
-			.droptarget { background-color: #348781}
-			div.confident { color: black; }
-			div.vague { color: lightgrey; }
-			#note { display: inline-block; height:180px; text-align: left;}
-			
-			#detector { width: 800px; height: 600px; border: 4px solid gray; border-radius: 8px; text-align: center; padding-top: 10px;}
-			#output { width: 600px; height: 552px; }
-			#flat { display: none; }
-			#sharp { display: none; }
-			.flat #flat { display: inline; }
-			.sharp #sharp { display: inline; }
-		</style>
+		<link rel="stylesheet" href="css/styles.css">
 	</head>
 	<body>
 		<script src="js/pitchdetect.js"></script>
 		
 		<p>
-			<button onclick="this.innerText = togglePlayback()"></button>
-			<button onclick="toggleLiveInput()">HUM</button>
-			<button onclick="toggleOscillator()"></button>
+			<button onclick="startHumming()">Hum to create art</button>
 		</p>
 
-		<div id="detector" class="vague">
+		<div id="detector">
 			<div class="pitch"><span id="pitch">--</span>Hz</div>
 			<div class="note"><span id="note">--</span></div>   
-			<canvas id="output"></canvas>
-			<div id="detune"><span id="detune_amt"></div>
 		</div>
 
-		just used for debugging
-		<canvas id="waveform" width="512" height="256"></canvas>
-		
-		
-
+		<canvas id="canvas" width="512" height="256"></canvas>
 	</body>
 </html>
