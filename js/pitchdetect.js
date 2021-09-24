@@ -85,23 +85,22 @@ function gotStream(stream) {
 }
 
 function drawArt(time) {
-    var cycles = new Array();
     analyser.getFloatTimeDomainData(buf);
     var pitch = getPitch(buf, audioContext.sampleRate);
 
     if (canvasElem) {
         // This draws the current waveform, useful for debugging
-        canvas.clearRect(0, 0, 512, 256);
+        //canvas.clearRect(0, 0, 512, 256);
         canvas.strokeStyle = "red";
         canvas.beginPath();
         canvas.moveTo(0, 0);
-        canvas.lineTo(0, 256);
+        canvas.lineTo(0, 600);
         canvas.moveTo(128, 0);
-        canvas.lineTo(128, 256);
+        canvas.lineTo(128, 600);
         canvas.moveTo(256, 0);
-        canvas.lineTo(256, 256);
+        canvas.lineTo(256, 600);
         canvas.moveTo(384, 0);
-        canvas.lineTo(384, 256);
+        canvas.lineTo(384, 600);
         canvas.moveTo(512, 0);
         canvas.lineTo(512, 256);
         canvas.stroke();
@@ -112,12 +111,6 @@ function drawArt(time) {
             canvas.lineTo(i, 128 + buf[i] * 128);
         }
         canvas.stroke();
-    }
-
-    if (pitch != -1) {
-        pitchElem.innerText = Math.round(pitch);
-        var note = getNoteFromPitch(pitch);
-        noteElem.innerHTML = noteStrings[note % 12];
     }
 
     if (!window.requestAnimationFrame)
