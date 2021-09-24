@@ -8,7 +8,7 @@ var theBuffer = null;
 var canvasElem = null;
 var mediaStreamSource = null;
 var detectorElem, 
-	canvas,
+	context,
 	pitchElem,
 	noteElem;
 var rafID = null;
@@ -16,7 +16,7 @@ var tracks = null;
 var buflen = 2048;
 var buf = new Float32Array(buflen);
 
-var noteStrings = [
+var notes = [
     "C",
     "C#",
     "D",
@@ -31,14 +31,19 @@ var noteStrings = [
     "B",
 ];
 
+var canvasWidth = 800;
+var canvasHeight = 600;
+var xValue = 0;
+var yValue = canvasHeight;
+
 window.onload = function() {
 	audioContext = new AudioContext();
 	detectorElem = document.getElementById( "detector" );
 	canvasElem = document.getElementById("canvas");
 	if (canvasElem) {
-		canvas = canvasElem.getContext("2d");
-		canvas.strokeStyle = "black";
-		canvas.lineWidth = 1;
+		context = canvasElem.getContext("2d");
+		context.strokeStyle = "black";
+		context.lineWidth = 1;
 	}
 	pitchElem = document.getElementById( "pitch" );
 	noteElem = document.getElementById( "note" );
@@ -87,30 +92,34 @@ function gotStream(stream) {
 function drawArt(time) {
     analyser.getFloatTimeDomainData(buf);
     var pitch = getPitch(buf, audioContext.sampleRate);
+    var noteValue = getNoteValueFromPitch(pitch);
+
+    //increment the x value arbitrarily so we see marks across the x axis. Reset if we reach the end of the canvas.
+    xValue = xValue + 10;
+    if (xValue === canvasWidth) {
+        xValue = 0;
+    }
+
+    //get y value based on the note value.
+    yValue = getYValueFromNote(noteValue);
+
+    console.log(xValue + ", " + yValue);
 
     if (canvasElem) {
-        // This draws the current waveform, useful for debugging
-        //canvas.clearRect(0, 0, 512, 256);
-        canvas.strokeStyle = "red";
-        canvas.beginPath();
-        canvas.moveTo(0, 0);
-        canvas.lineTo(0, 600);
-        canvas.moveTo(128, 0);
-        canvas.lineTo(128, 600);
-        canvas.moveTo(256, 0);
-        canvas.lineTo(256, 600);
-        canvas.moveTo(384, 0);
-        canvas.lineTo(384, 600);
-        canvas.moveTo(512, 0);
-        canvas.lineTo(512, 256);
-        canvas.stroke();
-        canvas.strokeStyle = "black";
-        canvas.beginPath();
-        canvas.moveTo(0, buf[0]);
-        for (var i = 1; i < 512; i++) {
-            canvas.lineTo(i, 128 + buf[i] * 128);
-        }
-        canvas.stroke();
+		//draw the first mark
+        context.strokeStyle = "red";
+        context.beginPath();
+        context.moveTo(xValue, yValue);
+        context.lineTo(xValue, yValue - 2);
+        context.stroke();
+
+		//draw a second one elsewhere in the y axis
+        var y2 = yValue + 400;
+        context.strokeStyle = "green";
+        context.beginPath();
+        context.moveTo(xValue, y2);
+        context.lineTo(xValue, y2 - 2);
+        context.stroke();
     }
 
     if (!window.requestAnimationFrame)
@@ -118,9 +127,45 @@ function drawArt(time) {
     rafID = window.requestAnimationFrame(drawArt);
 }
 
-function getNoteFromPitch(frequency) {
+function getYValueFromNote(note) {
+	return note % canvasHeight;
+	// if (note === "A") {
+    //     return canvasHeight / 1;
+    // } else if (note === "A#") {
+    //     return canvasHeight / 2;
+    // } else if (note === "B") {
+    //     return canvasHeight / 3;
+    // } else if (note === "C") {
+    //     return canvasHeight / 4;
+    // } else if (note === "C#") {
+    //     return canvasHeight / 5;
+    // } else if (note === "D") {
+    //     return canvasHeight / 6;
+    // } else if (note === "D#") {
+    //     return canvasHeight / 7;
+    // } else if (note === "E") {
+    //     return canvasHeight / 8;
+    // } else if (note === "F") {
+    //     return canvasHeight / 9;
+    // } else if (note === "F#") {
+    //     return canvasHeight / 10;
+    // } else if (note === "G") {
+    //     return canvasHeight / 11;
+    // } else if (note === "G#") {
+    //     return canvasHeight / 12;
+    // }
+}
+
+function getNoteValueFromPitch(frequency) {
 	var noteNum = 12 * (Math.log( frequency / 440 )/Math.log(2) );
-	return Math.round( noteNum ) + 69;
+	var noteValue =  Math.round( noteNum ) + 69;
+	return noteValue;
+}
+
+function getNoteStringFromPitch(frequency) {
+    var noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
+    var noteValue = Math.round(noteNum) + 69;
+    return notes[noteValue % 12];
 }
 
 function getPitch( buf, sampleRate ) {
